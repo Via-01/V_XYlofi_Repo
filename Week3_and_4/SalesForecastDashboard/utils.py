@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+from pathlib import Path
+import os
 
 
 def get_season(month):
@@ -16,7 +18,15 @@ def get_season(month):
 @st.cache_data(show_spinner="Loading and preparing sales data...")
 def load_data():
 
-    df = pd.read_csv("dashboard_data/train.csv")
+    base = Path(__file__).parent
+
+    st.write("Base:", base)
+    st.write("Exists dashboard_data:", (base / "dashboard_data").exists())
+
+    if (base / "dashboard_data").exists():
+        st.write("Files:", os.listdir(base / "dashboard_data"))
+
+    df = pd.read_csv(base / "dashboard_data" / "train.csv")
 
     # The source file stores dates as DD/MM/YYYY (e.g. "08/11/2017" = 8 Nov
     # 2017). read_csv's parse_dates can silently leave these as plain
