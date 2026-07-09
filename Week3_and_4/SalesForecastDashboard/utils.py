@@ -1,6 +1,19 @@
-import streamlit as st
-import pandas as pd
+from pathlib import Path
 
+import pandas as pd
+import streamlit as st
+
+# ============================================================================
+# Base project paths
+# ============================================================================
+
+BASE_DIR = Path(__file__).resolve().parent
+DASHBOARD_DATA_DIR = BASE_DIR / "dashboard_data"
+
+
+# ============================================================================
+# Helper functions
+# ============================================================================
 
 def get_season(month):
     if month in [12, 1, 2]:
@@ -13,17 +26,31 @@ def get_season(month):
         return "Autumn"
 
 
+# ============================================================================
+# Main dataset
+# ============================================================================
+
 @st.cache_data(show_spinner="Loading and preparing sales data...")
 def load_data():
 
-    df = pd.read_csv("SalesForecastDashboard/train.csv")
+    csv_path = BASE_DIR / "train.csv"
 
-    # The source file stores dates as DD/MM/YYYY (e.g. "08/11/2017" = 8 Nov
-    # 2017). read_csv's parse_dates can silently leave these as plain
-    # strings instead of raising when the format is ambiguous, so dates are
-    # parsed explicitly here with dayfirst=True — matching the notebook.
-    df["Order Date"] = pd.to_datetime(df["Order Date"], dayfirst=True)
-    df["Ship Date"] = pd.to_datetime(df["Ship Date"], dayfirst=True)
+    if not csv_path.exists():
+        st.error(f"Dataset not found:\n{csv_path}")
+        st.stop()
+
+    df = pd.read_csv(csv_path)
+
+    # The source file stores dates as DD/MM/YYYY
+    df["Order Date"] = pd.to_datetime(
+        df["Order Date"],
+        dayfirst=True
+    )
+
+    df["Ship Date"] = pd.to_datetime(
+        df["Ship Date"],
+        dayfirst=True
+    )
 
     # Missing postal code fix
     df.loc[
@@ -43,6 +70,10 @@ def load_data():
     return df
 
 
+# ============================================================================
+# Aggregation helpers
+# ============================================================================
+
 def yearly_sales(df):
 
     return (
@@ -55,10 +86,12 @@ def yearly_sales(df):
 def monthly_sales(df):
 
     return (
-        df.groupby(pd.Grouper(
-            key="Order Date",
-            freq="ME"
-        ))["Sales"]
+        df.groupby(
+            pd.Grouper(
+                key="Order Date",
+                freq="ME"
+            )
+        )["Sales"]
         .sum()
         .reset_index()
     )
@@ -67,59 +100,68 @@ def monthly_sales(df):
 def weekly_sales(df):
 
     return (
-        df.groupby(pd.Grouper(
-            key="Order Date",
-            freq="W"
-        ))["Sales"]
+        df.groupby(
+            pd.Grouper(
+                key="Order Date",
+                freq="W"
+            )
+        )["Sales"]
         .sum()
         .reset_index()
     )
 
 
-# ---------------------------------------------------------------------------
-# Precomputed results exported from the Colab notebook (see
-# export_dashboard_data.py). These live in dashboard_data/ at the project
-# root and are read directly instead of retraining models in the app.
-# ---------------------------------------------------------------------------
-
-DASHBOARD_DATA_DIR = "dashboard_data"
-
+# ============================================================================
+# Dashboard CSV loaders
+# ============================================================================
 
 def _require_precomputed(filename):
-    import os
-    path = os.path.join(DASHBOARD_DATA_DIR, filename)
-    if not os.path.exists(path):
+
+    path = DASHBOARD_DATA_DIR / filename
+
+    if not path.exists():
         st.error(
-            f"Missing `{path}`. Run the export cell at the end of the "
-            f"analysis notebook and place the resulting `{DASHBOARD_DATA_DIR}/` "
-            f"folder next to `train.csv` in this project."
+            f"Missing file:\n\n{path}\n\n"
+            "Please ensure the dashboard_data folder is included "
+            "with the deployed application."
         )
         st.stop()
+
     return path
 
 
 @st.cache_data(show_spinner="Loading model comparison...")
 def load_model_comparison():
-    path = _require_precomputed("model_comparison.csv")
-    return pd.read_csv(path)
+    return pd.read_csv(
+        _require_precomputed("model_comparison.csv")
+    )
 
 
 @st.cache_data(show_spinner="Loading segment forecasts...")
 def load_segment_forecasts():
-    path = _require_precomputed("segment_forecasts.csv")
-    df = pd.read_csv(path, parse_dates=["Date"])
-    return df
+
+    return pd.read_csv(
+        _require_precomputed("segment_forecasts.csv"),
+        parse_dates=["Date"]
+    )
 
 
 @st.cache_data(show_spinner="Loading anomaly report...")
 def load_weekly_anomalies():
-    path = _require_precomputed("weekly_anomalies.csv")
-    df = pd.read_csv(path, parse_dates=["Week"])
+
+    df = pd.read_csv(
+        _require_precomputed("weekly_anomalies.csv"),
+        parse_dates=["Week"]
+    )
+
     df["Isolation"] = df["Isolation"].astype(bool)
+
     return df
 
 
 @st.cache_data(show_spinner="Loading demand clusters...")
 def load_demand_clusters():
-    path = _require_precomputed("demand_clusters.csv")
-    return pd.read_csv(path)
+
+    return pd.read_csv(
+        _require_precomputed("demand_clusters.csv")
+    )
