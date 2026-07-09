@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 from theme import inject_css, style_fig, page_header, ACCENT, DANGER
+from utils import load_weekly_anomalies
 
 # Configure the page.
 st.set_page_config(
@@ -24,15 +25,8 @@ page_header(
 # ==========================================================
 
 
-@st.cache_data(show_spinner="Loading anomaly detection results...")
-def load_weekly_anomalies():
-    data = pd.read_csv("dashboard_data/weekly_anomalies.csv", parse_dates=["Week"])
-    data = data.set_index("Week")
-    data["Isolation"] = data["Isolation"].astype(bool)
-    return data
-
-
 weekly_sales = load_weekly_anomalies()
+weekly_sales = weekly_sales.set_index("Week")
 
 anomalies = weekly_sales[weekly_sales["Isolation"]]
 

@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
+from pathlib import Path
 
 from utils import load_data
 from theme import inject_css, style_fig, page_header
@@ -27,10 +28,21 @@ df = load_data()
 # ==========================================================
 
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+DASHBOARD_DATA_DIR = BASE_DIR / "dashboard_data"
+
+
 @st.cache_data(show_spinner="Loading precomputed forecasts...")
 def load_forecast_data():
-    forecasts = pd.read_csv("dashboard_data/segment_forecasts.csv", parse_dates=["Date"])
-    comparison = pd.read_csv("dashboard_data/model_comparison.csv")
+    forecasts = pd.read_csv(
+        DASHBOARD_DATA_DIR / "segment_forecasts.csv",
+        parse_dates=["Date"],
+    )
+
+    comparison = pd.read_csv(
+        DASHBOARD_DATA_DIR / "model_comparison.csv"
+    )
+
     return forecasts, comparison
 
 
