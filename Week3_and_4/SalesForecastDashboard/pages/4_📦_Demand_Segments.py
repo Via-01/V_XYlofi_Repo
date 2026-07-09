@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 
 from theme import inject_css, style_fig, page_header
+from utils import load_demand_clusters
 
 # Configure the page.
 st.set_page_config(
@@ -22,12 +23,6 @@ page_header(
 # ==========================================================
 # LOAD PRECOMPUTED CLUSTERS (from the Colab notebook)
 # ==========================================================
-
-
-@st.cache_data(show_spinner="Loading demand segments...")
-def load_demand_clusters():
-    return pd.read_csv("dashboard_data/demand_clusters.csv")
-
 
 cluster_df = load_demand_clusters()
 
