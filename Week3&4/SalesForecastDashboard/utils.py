@@ -16,7 +16,7 @@ def get_season(month):
 @st.cache_data(show_spinner="Loading and preparing sales data...")
 def load_data():
 
-    df = pd.read_csv("train.csv")
+    df = pd.read_csv("dashboard_data/train.csv")
 
     # The source file stores dates as DD/MM/YYYY (e.g. "08/11/2017" = 8 Nov
     # 2017). read_csv's parse_dates can silently leave these as plain
