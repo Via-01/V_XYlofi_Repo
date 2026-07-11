@@ -1,5 +1,5 @@
 import streamlit as st
-import pandas as pd
+import pandas as pd  # noqa: F401
 import plotly.graph_objects as go
 
 from theme import inject_css, style_fig, page_header, ACCENT, DANGER
