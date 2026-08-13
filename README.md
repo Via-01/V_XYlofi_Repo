@@ -194,7 +194,7 @@ Each week's folder contains a detailed executive-summary PDF alongside the analy
 
 ## 📜 Certificate of Completion
 
-[📄 View Certificate (PDF)](Vaishnavi%20Bhan%20-%20XYlofy%20AI%20Certificate.pdf)
+[📄 View Certificate (PDF)](VaishnaviBhan-CompletionCertificate.pdf)
 
 Issued by XYlofy AI on 30th June 2026, confirming successful completion of the 4-Week AI & Data Science Internship (15 June – 15 July 2026).
 
